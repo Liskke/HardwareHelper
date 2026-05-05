@@ -4,13 +4,36 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HardwareHelper.Models
 {
+    public enum TypUrzadzenia
+    {
+        [Display(Name = "Laptop")]
+        Laptop,
+
+        [Display(Name = "Komputer PC")]
+        PC,
+
+        [Display(Name = "Monitor")]
+        Monitor,
+
+        [Display(Name = "Konsola")]
+        Konsola,
+
+        [Display(Name = "Zasilacz / Akcesoria")]
+        Akcesoria,
+
+        [Display(Name = "Inne")]
+        Inne
+    }
     public class Zlecenie
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Typ urządzenia jest wymagany.")]
+        [Display(Name = "Numer Zlecenia")]
+        public string? NumerZlecenia { get; set; }
+
+        [Required(ErrorMessage = "Wybierz typ urządzenia.")]
         [Display(Name = "Typ urządzenia")]
-        public string TypUrzadzenia { get; set; }
+        public TypUrzadzenia TypUrzadzenia { get; set; }
 
         [Required(ErrorMessage = "Producent jest wymagany.")]
         [Display(Name = "Producent")]
@@ -50,8 +73,13 @@ namespace HardwareHelper.Models
 
         public ZlecenieStatus Status { get; set; } = ZlecenieStatus.Oczekuje_na_dostarczenie;
 
+        [Display(Name = "Przewidywana data zakończenia")]
+        public DateTime? PrzewidywanaDataZakonczenia { get; set; }
+
         [Display(Name = "Notatki techniczne (tylko serwis)")]
         public string? ServiceNotes { get; set; }
+
+
 
         //Relacja 1:N (Jeden użytkownik -> Wiele zgłoszeń)
         public string? UserId { get; set; }
