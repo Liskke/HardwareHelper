@@ -73,6 +73,9 @@ namespace HardwareHelper.Models
 
         public ZlecenieStatus Status { get; set; } = ZlecenieStatus.Oczekuje_na_dostarczenie;
 
+        [Display(Name = "Data utworzenia")]
+        public DateTime DataUtworzenia { get; set; } = DateTime.Now;
+
         [Display(Name = "Przewidywana data zakończenia")]
         public DateTime? PrzewidywanaDataZakonczenia { get; set; }
 
