@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
@@ -40,4 +41,19 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+using (var scope = app.Services.CreateScope())
+{
+    var MenadzerRol = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
+
+    string[] NazwyRol = { "Admin", "Serwisant", "Klient" };
+
+    foreach (var NazwaRoli in NazwyRol)
+    {  
+        var RolaIstnieje = await MenadzerRol.RoleExistsAsync(NazwaRoli);
+        if (!RolaIstnieje)
+        {
+            await MenadzerRol.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole(NazwaRoli));
+        }
+    }
+}
 app.Run();
