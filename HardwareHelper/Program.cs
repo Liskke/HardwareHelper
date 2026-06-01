@@ -55,5 +55,29 @@ using (var scope = app.Services.CreateScope())
             await MenadzerRol.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole(NazwaRoli));
         }
     }
+    var MenadzerUzytkownikow = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    string emailAdmina = "admin@hardware.pl";
+    string hasloAdmina = "Hardware123!";
+
+    var uzytkownikAdmin = await MenadzerUzytkownikow.FindByEmailAsync(emailAdmina);
+
+    if (uzytkownikAdmin == null)
+    {
+        var nowyAdmin = new IdentityUser
+        {
+            UserName = emailAdmina,
+            Email = emailAdmina,
+            EmailConfirmed = true
+        };
+
+        var wynikTworzenia = await MenadzerUzytkownikow.CreateAsync(nowyAdmin, hasloAdmina);
+
+        if (wynikTworzenia.Succeeded)
+        {
+            await MenadzerUzytkownikow.AddToRoleAsync(nowyAdmin, "Admin");
+            await MenadzerUzytkownikow.AddToRoleAsync(nowyAdmin, "Serwisant");
+        }
+    }
 }
 app.Run();
