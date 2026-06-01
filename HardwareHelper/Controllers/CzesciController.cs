@@ -1,9 +1,10 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HardwareHelper.Models;
 using HardwareHelper.Data;
 
+[Authorize(Roles = "Admin", "Serwisant")]
 public class CzesciController : Controller
 {
     private readonly ApplicationDbContext _context;
