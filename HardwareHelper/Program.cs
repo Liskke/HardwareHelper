@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
@@ -40,4 +41,43 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+using (var scope = app.Services.CreateScope())
+{
+    var MenadzerRol = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
+
+    string[] NazwyRol = { "Admin", "Serwisant", "Klient" };
+
+    foreach (var NazwaRoli in NazwyRol)
+    {  
+        var RolaIstnieje = await MenadzerRol.RoleExistsAsync(NazwaRoli);
+        if (!RolaIstnieje)
+        {
+            await MenadzerRol.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole(NazwaRoli));
+        }
+    }
+    var MenadzerUzytkownikow = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    string emailAdmina = "admin@hardware.pl";
+    string hasloAdmina = "Hardware123!";
+
+    var uzytkownikAdmin = await MenadzerUzytkownikow.FindByEmailAsync(emailAdmina);
+
+    if (uzytkownikAdmin == null)
+    {
+        var nowyAdmin = new IdentityUser
+        {
+            UserName = emailAdmina,
+            Email = emailAdmina,
+            EmailConfirmed = true
+        };
+
+        var wynikTworzenia = await MenadzerUzytkownikow.CreateAsync(nowyAdmin, hasloAdmina);
+
+        if (wynikTworzenia.Succeeded)
+        {
+            await MenadzerUzytkownikow.AddToRoleAsync(nowyAdmin, "Admin");
+            await MenadzerUzytkownikow.AddToRoleAsync(nowyAdmin, "Serwisant");
+        }
+    }
+}
 app.Run();
