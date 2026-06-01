@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using HardwareHelper.Models;
 using HardwareHelper.Data;
 
-[Authorize(Roles = "Admin", "Serwisant")]
+[Authorize(Roles = "Admin, Serwisant")]
 public class CzesciController : Controller
 {
     private readonly ApplicationDbContext _context;
