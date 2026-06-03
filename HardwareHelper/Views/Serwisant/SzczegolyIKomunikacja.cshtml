@@ -1,0 +1,57 @@
+﻿@model HardwareHelper.Models.Zlecenie
+
+@{
+    ViewData["Title"] = "Komunikacja i Szczegóły";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="card border-info h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5>Szczegóły zlecenia #@Model.Id</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Urządzenie:</strong> @Model.TypUrzadzenia</p>
+                    <p><strong>Model:</strong> @Model.Producent @Model.Model</p>
+                    <p><strong>Opis usterki klienta:</strong> @Model.OpisUsterki</p>
+                    <p><strong>Status:</strong> @Model.Status</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-chat-left-text"></i> Historia wiadomości z klientem</h5>
+                </div>
+                <div class="card-body d-flex flex-column" style="height: 350px; overflow-y: auto;">
+                    @if (Model.Wiadomosc != null && Model.Wiadomosc.Any())
+                    {
+                        @foreach (var msg in Model.Wiadomosc.OrderBy(m => m.DataWyslania))
+                        {
+                            <div class="mb-3 p-2 rounded @(msg.NadawcaId == Model.UserId ? "bg-light text-start border-start border-3 border-secondary" : "bg-primary text-white text-end align-self-end w-75")">
+                                <small class="d-block text-muted" style="font-size:0.75rem;">@msg.DataWyslania.ToString("g")</small>
+                                <span>@msg.Tresc</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center my-auto">Brak wcześniejszych wiadomości w tym zgłoszeniu.</p>
+                    }
+                </div>
+                <div class="card-footer bg-white">
+                    <form asp-action="DodajWiadomosc" method="post">
+                        <input type="hidden" name="zlecenieId" value="@Model.Id" />
+                        <div class="input-group">
+                            <input type="text" name="trescWiadomosci" class="form-control" placeholder="Wpisz odpowiedź do klienta..." required />
+                            <button type="submit" class="btn btn-primary">Wyślij</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">Powrót do pulpitu</a>
+</div>
