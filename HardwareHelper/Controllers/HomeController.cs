@@ -15,7 +15,7 @@ namespace HardwareHelper.Controllers
 
         public IActionResult Index()
         {
-            // 1. Jeśli użytkownik nie jest zalogowany, automatycznie wyrzuć go na stronę logowania
+            // 1. Jeśli użytkownik nie jest zalogowany, automatycznie przekierujemy go na stronę logowania
             if (!User.Identity.IsAuthenticated)
             {
                 return LocalRedirect("/Identity/Account/Login");

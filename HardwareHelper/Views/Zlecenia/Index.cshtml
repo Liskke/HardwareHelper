@@ -45,7 +45,6 @@
                                     </td>
                                     <td>@item.DataUtworzenia.ToString("dd.MM.yyyy HH:mm")</td>
                                     <td>
-                                        @* Zależnie od statusu możemy wyświetlić inny kolor etykiety *@
                                         @if (item.Status.ToString().Contains("Zakończone"))
                                         {
                                             <span class="badge bg-success py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>

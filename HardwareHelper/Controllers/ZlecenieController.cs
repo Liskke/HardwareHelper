@@ -62,12 +62,11 @@ namespace HardwareHelper.Controllers
             return View();
         }
 
-        // POST: Zlecenia/Create (Zapis formularza do bazy!)
+        // POST: Zlecenia/Create (Zapis formularza do bazy)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TypUrzadzenia,Producent,Model,NumerSeryjny,OpisUsterki,CzyJestZasilacz,NaprawaGwarancyjna,DataZakupu,KodPocztowy,Miasto,Ulica,Numer")] Zlecenie zlecenie)
         {
-            // Omijamy walidację pól systemowych i relacyjnych powiązanych z bazą (ukrywały nam błędy)
             ModelState.Remove("NumerZlecenia");
             ModelState.Remove("UserId");
             ModelState.Remove("User");
@@ -80,23 +79,16 @@ namespace HardwareHelper.Controllers
             {
                 // Przypisanie zlecenia do aktualnie zalogowanego Klienta
                 zlecenie.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                // Generowanie unikalnego numeru zlecenia
                 string losowySufiks = Guid.NewGuid().ToString().Substring(0, 5).ToUpper();
                 zlecenie.NumerZlecenia = $"ZGL/{DateTime.Now:yyyyMM}/{losowySufiks}";
-
-                // Ustawienia domyślne dla nowego zgłoszenia
                 zlecenie.DataUtworzenia = DateTime.Now;
 
                 // Zapis do bazy
                 _context.Add(zlecenie);
                 await _context.SaveChangesAsync();
-
-                // Po udanym dodaniu wracamy do listy "Moje zgłoszenia"
                 return RedirectToAction(nameof(Index));
             }
 
-            // Jeśli coś z formularzem jest nie tak, wróci do Ciebie wyświetlając błędy
             return View(zlecenie);
         }
 

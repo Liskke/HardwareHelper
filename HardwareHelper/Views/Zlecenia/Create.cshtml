@@ -123,47 +123,38 @@
             // --- LOGIKA 1: POKAZYWANIE I UKRYWANIE POLA ---
             function toggleDataZakupu() {
                 if (gwarancjaCheckbox.checked) {
-                    // Pokaż kontener
                     dataZakupuContainer.classList.remove("d-none");
-                    
-                    // HTML5 restrykcja w kalendarzu (nie da się kliknąć przyszłości)
                     const today = new Date().toISOString().split('T')[0];
                     dataZakupuInput.setAttribute('max', today);
                 } else {
-                    // Ukryj kontener i wyczyść dane, by nie wysłać śmieci do bazy
                     dataZakupuContainer.classList.add("d-none");
                     dataZakupuInput.value = "";
                     dataZakupuError.textContent = "";
                 }
             }
 
-            // Nasłuchujemy kliknięcia w checkboxa
             gwarancjaCheckbox.addEventListener("change", toggleDataZakupu);
 
-            // Wywołujemy od razu (przydatne, gdy formularz wróci z błędem z serwera, a checkbox był już zaznaczony)
             toggleDataZakupu();
 
             // --- LOGIKA 2: WALIDACJA DATY PRZY WYSYŁANIU FORMULARZA ---
             form.addEventListener("submit", function (e) {
-                // Jeśli zaznaczono gwarancję, data musi być poprawna
                 if (gwarancjaCheckbox.checked) {
-                    // Sprawdzamy czy w ogóle wpisano datę
                     if (!dataZakupuInput.value) {
-                        e.preventDefault(); // Zatrzymuje wysyłanie
+                        e.preventDefault();
                         dataZakupuError.textContent = "Data zakupu jest wymagana przy naprawie gwarancyjnej!";
                         return;
                     }
 
-                    // Sprawdzamy czy data nie jest z przyszłości
                     const selectedDate = new Date(dataZakupuInput.value);
                     const now = new Date();
-                    now.setHours(0,0,0,0); // Ignorujemy godziny, sprawdzamy sam dzień
+                    now.setHours(0,0,0,0);
 
                     if (selectedDate > now) {
-                        e.preventDefault(); // Zatrzymuje wysyłanie formularza
+                        e.preventDefault();
                         dataZakupuError.textContent = "Data zakupu nie może być z przyszłości!";
                     } else {
-                        dataZakupuError.textContent = ""; // Czyścimy błąd, gdy jest ok
+                        dataZakupuError.textContent = "";
                     }
                 }
             });
