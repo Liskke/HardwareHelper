@@ -1,0 +1,75 @@
+﻿@model IEnumerable<HardwareHelper.Models.Zlecenie>
+
+@{
+    ViewData["Title"] = "Moje zgłoszenia";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Historia moich zgłoszeń</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Dodaj nowe zgłoszenie
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info shadow-sm text-center p-4">
+            <h5 class="alert-heading fw-bold">Brak zgłoszeń!</h5>
+            <p>Nie masz jeszcze żadnych zgłoszeń serwisowych w naszym systemie.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.NumerZlecenia)</th>
+                                <th>Sprzęt</th>
+                                <th>@Html.DisplayNameFor(model => model.DataUtworzenia)</th>
+                                <th>Status</th>
+                                <th class="text-end">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@item.NumerZlecenia</td>
+                                    <td>
+                                        @item.Producent @item.Model<br />
+                                        <small class="text-muted">@item.TypUrzadzenia</small>
+                                    </td>
+                                    <td>@item.DataUtworzenia.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>
+                                        @* Zależnie od statusu możemy wyświetlić inny kolor etykiety *@
+                                        @if (item.Status.ToString().Contains("Zakończone"))
+                                        {
+                                            <span class="badge bg-success py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>
+                                        }
+                                        else if (item.Status.ToString().Contains("Oczekuje"))
+                                        {
+                                            <span class="badge bg-warning text-dark py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-dark">
+                                            Szczegóły
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

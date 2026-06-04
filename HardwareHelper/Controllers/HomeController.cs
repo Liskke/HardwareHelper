@@ -15,7 +15,21 @@ namespace HardwareHelper.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            // 1. Jeśli użytkownik nie jest zalogowany, automatycznie wyrzuć go na stronę logowania
+            if (!User.Identity.IsAuthenticated)
+            {
+                return LocalRedirect("/Identity/Account/Login");
+            }
+
+            // 2. Jeśli jest zalogowany, sprawdzamy jego rolę
+            if (User.IsInRole("Admin") || User.IsInRole("Serwisant"))
+            {
+                return View();
+            }
+            else
+            {
+                return RedirectToAction("Index", "Zlecenia");
+            }
         }
 
         public IActionResult Privacy()
