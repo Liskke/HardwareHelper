@@ -75,6 +75,57 @@
                     </div>
                 </div>
             </div>
+            @if (!string.IsNullOrEmpty(Model.PodsumowanieNaprawy) || Model.KosztRobocizny > 0)
+            {
+                decimal sumaCzesci = Model.CzescZamienna?.Sum(c => c.Cena) ?? 0;
+                decimal sumaCalkowita = Model.KosztRobocizny + sumaCzesci;
+
+                <div class="row mt-4 mb-2">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 text-success"><i class="bi bi-receipt"></i> Wystawiony rachunek i podsumowanie</h5>
+                        <div class="p-3 bg-success bg-opacity-10 border border-success rounded shadow-sm">
+                            <p class="fw-bold mb-1 text-success-emphasis">Oficjalny komunikat dla klienta:</p>
+                            <div class="mb-3 p-2 bg-white rounded border border-light" style="white-space: pre-wrap;">@(string.IsNullOrEmpty(Model.PodsumowanieNaprawy) ? "Brak wpisanego podsumowania." : Model.PodsumowanieNaprawy)</div>
+
+                            <div class="row">
+                                <div class="col-md-6 border-end">
+                                    <p class="mb-2 fw-bold text-success-emphasis">Zestawienie użytych części:</p>
+                                    @if (Model.CzescZamienna != null && Model.CzescZamienna.Any())
+                                    {
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach (var czesc in Model.CzescZamienna)
+                                            {
+                                                <li class="d-flex justify-content-between border-bottom pb-1 mb-1 text-muted">
+                                                    <span><i class="bi bi-tools me-2"></i>@czesc.Nazwa</span>
+                                                    <span>@czesc.Cena.ToString("C")</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic small">Brak użytych części.</span>
+                                    }
+                                </div>
+                                <div class="col-md-6 d-flex flex-column justify-content-center ps-4">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Koszt robocizny:</span>
+                                        <strong>@Model.KosztRobocizny.ToString("C")</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Suma za części:</span>
+                                        <strong>@sumaCzesci.ToString("C")</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2 pt-2 border-top border-success">
+                                        <span class="h5 mb-0 text-success fw-bold">Suma całkowita:</span>
+                                        <span class="h4 mb-0 text-success fw-bold">@sumaCalkowita.ToString("C")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
 
             <div class="d-flex justify-content-between mt-3 border-top pt-3">
                 <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Powrót do listy</a>

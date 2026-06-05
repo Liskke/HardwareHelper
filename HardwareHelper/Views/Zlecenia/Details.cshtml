@@ -147,12 +147,41 @@
                 </div>
             </div>
 
-            @if (!string.IsNullOrEmpty(Model.ServiceNotes) && Model.Status.ToString().Contains("Zakończone"))
+            @if (!string.IsNullOrEmpty(Model.PodsumowanieNaprawy))
             {
-                <div class="card shadow-sm border-0 bg-success bg-opacity-10">
-                    <div class="card-body">
-                        <h5 class="fw-bold text-success"><i class="fas fa-clipboard-check me-2"></i>Podsumowanie naprawy</h5>
-                        <p class="mb-0 mt-2">@Model.ServiceNotes</p>
+                decimal sumaCzesci = Model.CzescZamienna?.Sum(c => c.Cena) ?? 0;
+                decimal sumaCalkowita = Model.KosztRobocizny + sumaCzesci;
+
+                <div class="card shadow-sm border-0 bg-success bg-opacity-10 mt-4 border-start border-success border-4">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold text-success mb-3">Oficjalne Podsumowanie Naprawy</h4>
+                        <p class="fs-5" style="white-space: pre-wrap;">@Model.PodsumowanieNaprawy</p>
+
+                        <hr class="border-success opacity-25">
+
+                        <h5 class="fw-bold mb-3">Rozbicie kosztów:</h5>
+                        <ul class="list-group list-group-flush bg-transparent mb-3">
+                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
+                                Usługa serwisowa (Robocizna)
+                                <span class="fw-bold">@Model.KosztRobocizny.ToString("C")</span>
+                            </li>
+
+                            @if (Model.CzescZamienna != null && Model.CzescZamienna.Any())
+                            {
+                                foreach (var czesc in Model.CzescZamienna)
+                                {
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center text-muted">
+                                        <small><i class="fas fa-microchip me-2"></i>@czesc.Nazwa</small>
+                                        <small>@czesc.Cena.ToString("C")</small>
+                                    </li>
+                                }
+                            }
+                        </ul>
+
+                        <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
+                            <h5 class="mb-0 text-uppercase fw-bold">Do zapłaty:</h5>
+                            <h3 class="mb-0 text-success fw-bold">@sumaCalkowita.ToString("C")</h3>
+                        </div>
                     </div>
                 </div>
             }

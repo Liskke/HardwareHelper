@@ -48,6 +48,7 @@ namespace HardwareHelper.Controllers
 
             var zlecenie = await _context.Zlecenia
                 .Include(z => z.User)
+                .Include(z => z.CzescZamienna)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (zlecenie == null) return NotFound();
@@ -58,17 +59,19 @@ namespace HardwareHelper.Controllers
         // Edycja i zarządzanie zleceniem (GET)
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
-            var zlecenie = await _context.Zlecenia.FindAsync(id);
-            if (zlecenie == null) return NotFound();
+            var zlecenie = await _context.Zlecenia
+                .Include(z => z.CzescZamienna)
+                .FirstOrDefaultAsync(z => z.Id == id);
 
+            if (zlecenie == null) return NotFound();
+            ViewBag.DostepneCzesci = await _context.CzescZamienne.ToListAsync();
             return View(zlecenie);
         }
 
         // Edycja i zarządzanie zleceniem (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TypUrzadzenia,Producent,Model,NumerSeryjny,Status,ServiceNotes,UserId,PrzewidywanaDataZakonczenia")] Zlecenie uaktualnioneZlecenie)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,TypUrzadzenia,Producent,Model,NumerSeryjny,Status,ServiceNotes,UserId,PrzewidywanaDataZakonczenia,PodsumowanieNaprawy,KosztRobocizny")] Zlecenie uaktualnioneZlecenie, int[] wybraneCzesciIds)
         {
             if (id != uaktualnioneZlecenie.Id) return NotFound();
 
@@ -80,13 +83,15 @@ namespace HardwareHelper.Controllers
             ModelState.Remove("Ulica");
             ModelState.Remove("Numer");
             ModelState.Remove("User");
+            ModelState.Remove("CzescZamienna");
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     // Pobieramy oryginalny rekord z bazy danych
-                    var oryginalneZlecenie = await _context.Zlecenia.FindAsync(id);
+                    var oryginalneZlecenie = await _context.Zlecenia.Include(z => z.CzescZamienna)
+                        .FirstOrDefaultAsync(z => z.Id == id);
                     if (oryginalneZlecenie == null) return NotFound();
 
                     // Aktualizujemy tylko te pola, które serwisant modyfikuje
@@ -97,6 +102,21 @@ namespace HardwareHelper.Controllers
                     oryginalneZlecenie.Producent = uaktualnioneZlecenie.Producent;
                     oryginalneZlecenie.PrzewidywanaDataZakonczenia = uaktualnioneZlecenie.PrzewidywanaDataZakonczenia;
 
+                    oryginalneZlecenie.PodsumowanieNaprawy = uaktualnioneZlecenie.PodsumowanieNaprawy;
+                    oryginalneZlecenie.KosztRobocizny = uaktualnioneZlecenie.KosztRobocizny;
+
+                    oryginalneZlecenie.CzescZamienna.Clear(); // Czyścimy stare
+                    if (wybraneCzesciIds != null && wybraneCzesciIds.Length > 0)
+                    {
+                        var czesciDoDodania = await _context.CzescZamienne
+                            .Where(c => wybraneCzesciIds.Contains(c.Id))
+                            .ToListAsync();
+
+                        foreach (var czesc in czesciDoDodania)
+                        {
+                            oryginalneZlecenie.CzescZamienna.Add(czesc);
+                        }
+                    }
                     _context.Update(oryginalneZlecenie);
                     await _context.SaveChangesAsync();
                 }
@@ -107,6 +127,7 @@ namespace HardwareHelper.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.DostepneCzesci = await _context.CzescZamienne.ToListAsync();
             return View(uaktualnioneZlecenie);
         }
 

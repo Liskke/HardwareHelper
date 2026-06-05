@@ -46,6 +46,7 @@ namespace HardwareHelper.Controllers
             var zlecenie = await _context.Set<Zlecenie>()
                 .Include(z => z.Wiadomosc)
                 .ThenInclude(w => w.Nadawca)
+                .Include(z => z.CzescZamienna)
                 .FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
 
             if (zlecenie == null)
