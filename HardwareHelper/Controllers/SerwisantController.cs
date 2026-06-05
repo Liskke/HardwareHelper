@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace HardwareHelper.Controllers
 {
-    [Authorize(Roles = "Admin,Serwisant")] // Dostęp tylko dla Serwisanta i Admina
+    [Authorize(Roles = "Admin,Serwisant")]
     public class SerwisantController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,7 +17,7 @@ namespace HardwareHelper.Controllers
             _context = context;
         }
 
-        // ZADANIE A: Widok główny + wyszukiwanie i filtrowanie
+        // Widok główny + wyszukiwanie i filtrowanie
         public async Task<IActionResult> Index(string searchString, int? statusFilter)
         {
             var zlecenia = _context.Zlecenia.Include(z => z.User).AsQueryable();
@@ -30,7 +30,7 @@ namespace HardwareHelper.Controllers
                                             || z.Id.ToString() == searchString);
             }
 
-            // Filtrowanie po statusie (o ile Status w modelu to int/enum)
+            // Filtrowanie po statusie
             if (statusFilter.HasValue)
             {
                 zlecenia = zlecenia.Where(z => (int)z.Status == statusFilter.Value);
@@ -38,44 +38,64 @@ namespace HardwareHelper.Controllers
 
             ViewData["CurrentSearch"] = searchString;
             ViewData["CurrentStatus"] = statusFilter;
-
             return View(await zlecenia.ToListAsync());
         }
 
-        // ZADANIE B: Edycja i zarządzanie zleceniem (GET)
-        public async Task<IActionResult> Edit(int? id)
+        // Pełny podgląd zgłoszenia (Read-only)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
+            var zlecenie = await _context.Zlecenia
+                .Include(z => z.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (zlecenie == null) return NotFound();
+
+            return View(zlecenie);
+        }
+
+        // Edycja i zarządzanie zleceniem (GET)
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
             var zlecenie = await _context.Zlecenia.FindAsync(id);
             if (zlecenie == null) return NotFound();
 
             return View(zlecenie);
         }
 
-        // ZADANIE B: Edycja i zarządzanie zleceniem (POST)
+        // Edycja i zarządzanie zleceniem (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TypUrzadzenia,Producent,Model,NumerSeryjny,OpisUsterki,CzyJestZasilacz,NaprawaGwarancyjna,DataZakupu,KodPocztowy,Miasto,Ulica,Numer,Status,ServiceNotes,UserId")] Zlecenie statusI_notatki)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,TypUrzadzenia,Producent,Model,NumerSeryjny,Status,ServiceNotes,UserId,PrzewidywanaDataZakonczenia")] Zlecenie uaktualnioneZlecenie)
         {
-            if (id != statusI_notatki.Id) return NotFound();
+            if (id != uaktualnioneZlecenie.Id) return NotFound();
+
+            // Usuwamy z walidacji pola klienta, których serwisant nie wypełnia w tym formularzu,
+            // zapobiegnie to błędowi niedziałającego zapisu statusu (ModelState.IsValid będzie true)
+            ModelState.Remove("OpisUsterki");
+            ModelState.Remove("KodPocztowy");
+            ModelState.Remove("Miasto");
+            ModelState.Remove("Ulica");
+            ModelState.Remove("Numer");
+            ModelState.Remove("User");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Pobieramy oryginalny obiekt, aby zaktualizować tylko zmienione przez serwisanta pola
+                    // Pobieramy oryginalny rekord z bazy danych
                     var oryginalneZlecenie = await _context.Zlecenia.FindAsync(id);
                     if (oryginalneZlecenie == null) return NotFound();
 
-                    // Aktualizacja danych klienta (w razie literówki), statusu i notatek
-                    oryginalneZlecenie.NumerSeryjny = statusI_notatki.NumerSeryjny;
-                    oryginalneZlecenie.Status = statusI_notatki.Status;
-                    oryginalneZlecenie.ServiceNotes = statusI_notatki.ServiceNotes;
-
-                    // Opcjonalnie: jeśli serwisant może poprawiać inne dane klienta
-                    oryginalneZlecenie.Model = statusI_notatki.Model;
-                    oryginalneZlecenie.Producent = statusI_notatki.Producent;
+                    // Aktualizujemy tylko te pola, które serwisant modyfikuje
+                    oryginalneZlecenie.NumerSeryjny = uaktualnioneZlecenie.NumerSeryjny;
+                    oryginalneZlecenie.Status = uaktualnioneZlecenie.Status;
+                    oryginalneZlecenie.ServiceNotes = uaktualnioneZlecenie.ServiceNotes;
+                    oryginalneZlecenie.Model = uaktualnioneZlecenie.Model;
+                    oryginalneZlecenie.Producent = uaktualnioneZlecenie.Producent;
+                    oryginalneZlecenie.PrzewidywanaDataZakonczenia = uaktualnioneZlecenie.PrzewidywanaDataZakonczenia;
 
                     _context.Update(oryginalneZlecenie);
                     await _context.SaveChangesAsync();
@@ -87,18 +107,16 @@ namespace HardwareHelper.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(statusI_notatki);
+            return View(uaktualnioneZlecenie);
         }
 
-        // ZADANIE C: Moduł komunikacji (Podgląd wiadomości i wysyłanie odpowiedzi)
+        // Moduł komunikacji (Podgląd wiadomości i wysyłanie odpowiedzi)
         public async Task<IActionResult> SzczegolyIKomunikacja(int? id)
         {
             if (id == null) return NotFound();
-
             var zlecenie = await _context.Zlecenia
-                .Include(z => z.Wiadomosc) // Zakładam, że kolekcja wiadomości w modelu nazywa się Wiadomosc lub Wiadomosci
+                .Include(z => z.Wiadomosc)
                 .FirstOrDefaultAsync(m => m.Id == id);
-
             if (zlecenie == null) return NotFound();
 
             return View(zlecenie);
@@ -113,7 +131,7 @@ namespace HardwareHelper.Controllers
                 return RedirectToAction(nameof(SzczegolyIKomunikacja), new { id = zlecenieId });
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Id zalogowanego serwisanta
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var nowaWiadomosc = new Wiadomosc
             {
@@ -125,7 +143,6 @@ namespace HardwareHelper.Controllers
 
             _context.Wiadomosci.Add(nowaWiadomosc);
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(SzczegolyIKomunikacja), new { id = zlecenieId });
         }
     }
