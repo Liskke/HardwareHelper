@@ -45,17 +45,17 @@
                                     </td>
                                     <td>@item.DataUtworzenia.ToString("dd.MM.yyyy HH:mm")</td>
                                     <td>
-                                        @if (item.Status.ToString().Contains("Zakończone"))
+                                        @if (item.Status == HardwareHelper.Models.ZlecenieStatus.Zakonczone)
                                         {
-                                            <span class="badge bg-success py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>
+                                            <span class="badge bg-success py-2 px-3">@Html.DisplayFor(modelItem => item.Status)</span>
                                         }
-                                        else if (item.Status.ToString().Contains("Oczekuje"))
+                                        else if (item.Status == HardwareHelper.Models.ZlecenieStatus.Oczekuje_na_diagnoze || item.Status == HardwareHelper.Models.ZlecenieStatus.Oczekuje_na_czesci)
                                         {
-                                            <span class="badge bg-warning text-dark py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>
+                                            <span class="badge bg-warning text-dark py-2 px-3">@Html.DisplayFor(modelItem => item.Status)</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-primary py-2 px-3">@item.Status.ToString().Replace("_", " ")</span>
+                                            <span class="badge bg-primary py-2 px-3">@Html.DisplayFor(modelItem => item.Status)</span>
                                         }
                                     </td>
                                     <td class="text-end">
