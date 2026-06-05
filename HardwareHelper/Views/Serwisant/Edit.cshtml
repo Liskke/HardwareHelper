@@ -1,0 +1,110 @@
+﻿@model HardwareHelper.Models.Zlecenie
+
+@{
+    ViewData["Title"] = "Edycja Zlecenia";
+}
+
+<div class="container mt-4" style="max-width: 700px;">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h4><i class="bi bi-pencil-square"></i> Zarządzanie Zleceniem #@Model.Id</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="TypUrzadzenia" />
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label asp-for="Producent" class="form-label">Producent</label>
+                        <input asp-for="Producent" class="form-control" />
+                        <span asp-validation-for="Producent" class="text-danger"></span>
+                    </div>
+                    <div class="col">
+                        <label asp-for="Model" class="form-label">Model</label>
+                        <input asp-for="Model" class="form-control" />
+                        <span asp-validation-for="Model" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NumerSeryjny" class="form-label">Numer Seryjny (Edycja literówek)</label>
+                    <input asp-for="NumerSeryjny" class="form-control" />
+                    <span asp-validation-for="NumerSeryjny" class="text-danger"></span>
+                </div>
+
+                <hr />
+
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label font-weight-bold">Status Zlecenia</label>
+                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<HardwareHelper.Models.ZlecenieStatus>()" class="form-select border-primary">
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PrzewidywanaDataZakonczenia" class="form-label font-weight-bold">Przewidywana data zakończenia</label>
+                    <input asp-for="PrzewidywanaDataZakonczenia" type="date" class="form-control border-primary" />
+                    <span asp-validation-for="PrzewidywanaDataZakonczenia" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ServiceNotes" class="form-label font-weight-bold">Notatki Techniczne Serwisu (Service Notes)</label>
+                    <textarea asp-for="ServiceNotes" class="form-control" rows="5" placeholder="Wpisz szczegóły diagnozy, wykonane czynności..."></textarea>
+                    <span asp-validation-for="ServiceNotes" class="text-danger"></span>
+                </div>
+
+                <hr class="mt-4 mb-4 border-2 border-primary" />
+                <h5 class="text-primary fw-bold"><i class="bi bi-receipt"></i> Koszty i Podsumowanie (Dla Klienta)</h5>
+
+                <div class="mb-3">
+                    <label asp-for="PodsumowanieNaprawy" class="form-label font-weight-bold">Oficjalne Podsumowanie (Co zostało zrobione)</label>
+                    <textarea asp-for="PodsumowanieNaprawy" class="form-control border-primary" rows="3" placeholder="Wpisz oficjalny komunikat dla klienta..."></textarea>
+                    <span asp-validation-for="PodsumowanieNaprawy" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3" style="max-width: 250px;">
+                    <label asp-for="KosztRobocizny" class="form-label font-weight-bold">Koszt samej robocizny (zł)</label>
+                    <input asp-for="KosztRobocizny" type="number" step="0.01" class="form-control border-primary" />
+                    <span asp-validation-for="KosztRobocizny" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label font-weight-bold">Zużyte Części z Magazynu:</label>
+                    <div class="p-3 border border-primary rounded bg-light shadow-sm" style="max-height: 200px; overflow-y: auto;">
+                        @if (ViewBag.DostepneCzesci != null)
+                        {
+                            foreach (var czesc in ViewBag.DostepneCzesci)
+                            {
+                                bool isChecked = Model.CzescZamienna != null && Model.CzescZamienna.Any(c => c.Id == czesc.Id);
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="wybraneCzesciIds" value="@czesc.Id" @(isChecked ? "checked" : "")>
+                                    <label class="form-check-label">
+                                        @czesc.Nazwa - <strong class="text-success">@czesc.Cena.ToString("C")</strong>
+                                    </label>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted fst-italic">Brak części w magazynie (lub magazyn nie został załadowany).</span>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+                    <button type="submit" class="btn btn-success">Zapisz zmiany</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

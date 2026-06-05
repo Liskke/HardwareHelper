@@ -1,0 +1,190 @@
+﻿@model HardwareHelper.Models.Zlecenie
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Szczegóły zgłoszenia";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Szczegóły zgłoszenia: <span class="text-primary">@Model.NumerZlecenia</span></h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            Powrót do listy
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white fw-bold">
+                    Dane sprzętu i usterki
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered mb-4">
+                        <tbody>
+                            <tr>
+                                <th class="w-25 bg-light">Typ urządzenia</th>
+                                <td>@Model.TypUrzadzenia</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Producent i Model</th>
+                                <td>@Model.Producent @Model.Model</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">@Html.DisplayNameFor(model => model.NumerSeryjny)</th>
+                                <td>@(string.IsNullOrEmpty(Model.NumerSeryjny) ? "Brak" : Model.NumerSeryjny)</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Typ naprawy</th>
+                                <td>
+                                    @if (Model.NaprawaGwarancyjna)
+                                    {
+                                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Gwarancyjna (Zakup: @Model.DataZakupu?.ToString("dd.MM.yyyy"))</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Odpłatna pogwarancyjna</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Czy zasilacz?</th>
+                                <td>@(Model.CzyJestZasilacz ? "Tak" : "Nie")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="fw-bold text-danger">Opis usterki:</h5>
+                    <div class="p-3 bg-light border rounded">
+                        @Model.OpisUsterki
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-comments me-2"></i>Komunikacja z serwisem</span>
+                    <span class="badge bg-light text-primary">@Model.Wiadomosc.Count() wiadomości</span>
+                </div>
+                
+                <div class="card-body bg-light" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column;">
+                    @if (Model.Wiadomosc != null && Model.Wiadomosc.Any())
+                    {
+                        foreach (var msg in Model.Wiadomosc.OrderBy(w => w.DataWyslania))
+                        {
+                            // Sprawdzamy czy to nasza wiadomość, czy odpowiedź serwisanta
+                            bool isMoja = msg.NadawcaId == User.FindFirstValue(ClaimTypes.NameIdentifier);
+                            
+                            <div class="mb-3 d-flex @(isMoja ? "justify-content-end" : "justify-content-start")">
+                                <div class="p-3 rounded-3 shadow-sm @(isMoja ? "bg-primary text-white" : "bg-white border")" style="max-width: 80%;">
+                                    <div class="fw-bold small mb-1 @(isMoja ? "text-light" : "text-primary")">
+                                        @(isMoja ? "Ty" : "Serwisant")
+                                        <span class="fw-normal ms-2 @(isMoja ? "text-white-50" : "text-muted")" style="font-size: 0.8em;">
+                                            @msg.DataWyslania.ToString("dd.MM HH:mm")
+                                        </span>
+                                    </div>
+                                    <div style="word-wrap: break-word;">@msg.Tresc</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted my-5">
+                            <i class="fas fa-envelope-open-text fa-3x mb-3 text-black-50"></i>
+                            <p>Brak wiadomości. Masz pytanie? Napisz do nas poniżej.</p>
+                        </div>
+                    }
+                </div>
+                
+                <div class="card-footer bg-white p-3 border-top">
+                    <form asp-action="DodajWiadomosc" method="post">
+                        <input type="hidden" name="zlecenieId" value="@Model.Id" />
+                        
+                        <div class="input-group">
+                            <input type="text" name="tresc" class="form-control bg-light border-0" placeholder="Wpisz swoją wiadomość..." autocomplete="off" required />
+                            <button type="submit" class="btn btn-primary px-4">
+                                Wyślij <i class="fas fa-paper-plane ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4 border-top border-primary border-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-uppercase text-muted mb-3">Obecny status</h5>
+                    <h4 class="mb-3">
+                        @if (Model.Status.ToString().Contains("Zakończone"))
+                        {
+                            <span class="badge bg-success w-100 py-3">@Model.Status.ToString().Replace("_", " ")</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary w-100 py-3">@Html.DisplayFor(m => m.Status)</span>
+                        }
+                    </h4>
+
+                    <hr />
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block fw-bold">Data utworzenia:</small>
+                        <span>@Model.DataUtworzenia.ToString("dd.MM.yyyy HH:mm")</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block fw-bold">Przewidywana data zakończenia:</small>
+                        @if (Model.PrzewidywanaDataZakonczenia.HasValue)
+                        {
+                            <span class="text-primary fw-bold">@Model.PrzewidywanaDataZakonczenia.Value.ToString("dd.MM.yyyy")</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted fst-italic">Czekamy na wstępną diagnozę</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.PodsumowanieNaprawy))
+            {
+                decimal sumaCzesci = Model.CzescZamienna?.Sum(c => c.Cena) ?? 0;
+                decimal sumaCalkowita = Model.KosztRobocizny + sumaCzesci;
+
+                <div class="card shadow-sm border-0 bg-success bg-opacity-10 mt-4 border-start border-success border-4">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold text-success mb-3">Oficjalne Podsumowanie Naprawy</h4>
+                        <p class="fs-5" style="white-space: pre-wrap;">@Model.PodsumowanieNaprawy</p>
+
+                        <hr class="border-success opacity-25">
+
+                        <h5 class="fw-bold mb-3">Rozbicie kosztów:</h5>
+                        <ul class="list-group list-group-flush bg-transparent mb-3">
+                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
+                                Usługa serwisowa (Robocizna)
+                                <span class="fw-bold">@Model.KosztRobocizny.ToString("C")</span>
+                            </li>
+
+                            @if (Model.CzescZamienna != null && Model.CzescZamienna.Any())
+                            {
+                                foreach (var czesc in Model.CzescZamienna)
+                                {
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center text-muted">
+                                        <small><i class="fas fa-microchip me-2"></i>@czesc.Nazwa</small>
+                                        <small>@czesc.Cena.ToString("C")</small>
+                                    </li>
+                                }
+                            }
+                        </ul>
+
+                        <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
+                            <h5 class="mb-0 text-uppercase fw-bold">Do zapłaty:</h5>
+                            <h3 class="mb-0 text-success fw-bold">@sumaCalkowita.ToString("C")</h3>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -20,18 +20,30 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Strona Główna</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        @if (User.IsInRole("Admin") || User.IsInRole("Serwisant"))
+    
+                        @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Czesci" asp-action="Index">Magazyn Części</a>
-                            </li>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Serwisant"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark fw-bold text-primary" asp-area="" asp-controller="Serwisant" asp-action="Index">Panel Serwisanta</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Czesci" asp-action="Index">Magazyn Części</a>
+                                </li>
+                            }
+                            else 
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Zlecenia" asp-action="Index"><i class="fas fa-list me-1"></i> Moje zgłoszenia</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Zlecenia" asp-action="Create"><i class="fas fa-plus-circle me-1"></i> Nowe zgłoszenie</a>
+                                </li>
+                            }
                         }
-
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

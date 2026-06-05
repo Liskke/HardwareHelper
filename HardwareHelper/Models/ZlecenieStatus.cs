@@ -7,7 +7,7 @@ namespace HardwareHelper.Models
         Oczekuje_na_dostarczenie,
 
         [Display(Name = "Oczekuje na diagnozę")]
-        Oczekuje_na_diagnose,
+        Oczekuje_na_diagnoze,
 
         [Display(Name = "W trakcie diagnozy")]
         W_trakcie_diagnozy,

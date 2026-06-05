@@ -1,0 +1,52 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Rejestracja konta";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-lg">
+            <div class="card-header bg-success text-white text-center py-4">
+                <h3 class="font-weight-light my-2">Dołącz do nas</h3>
+                <p class="mb-0">Utwórz konto klienta</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                        <label asp-for="Input.Email">Adres Email</label>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="hasło" />
+                        <label asp-for="Input.Password">Hasło</label>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="powtórz hasło" />
+                        <label asp-for="Input.ConfirmPassword">Powtórz hasło</label>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mb-0">
+                        <button id="registerSubmit" type="submit" class="btn btn-success btn-lg">Zarejestruj się</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3 bg-light">
+                <div class="small">
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none">Masz już konto? Zaloguj się!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

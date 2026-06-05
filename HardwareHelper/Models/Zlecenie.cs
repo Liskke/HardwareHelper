@@ -82,7 +82,11 @@ namespace HardwareHelper.Models
         [Display(Name = "Notatki techniczne (tylko serwis)")]
         public string? ServiceNotes { get; set; }
 
+        [Display(Name = "Podsumowanie naprawy")]
+        public string? PodsumowanieNaprawy { get; set; }
 
+        [Display(Name = "Koszt robocizny")]
+        public decimal KosztRobocizny { get; set; } = 0;
 
         //Relacja 1:N (Jeden użytkownik -> Wiele zgłoszeń)
         public string? UserId { get; set; }
