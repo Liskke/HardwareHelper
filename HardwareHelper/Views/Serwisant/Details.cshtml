@@ -1,0 +1,89 @@
+﻿@model HardwareHelper.Models.Zlecenie
+
+@{
+    ViewData["Title"] = "Szczegóły Zgłoszenia";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <h4><i class="bi bi-info-circle"></i> Pełny Podgląd Zlecenia #@Model.Id</h4>
+            <span class="badge bg-light text-dark fs-6">Status: @Model.Status</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h5 class="border-bottom pb-2 text-primary"><i class="bi bi-calendar-event"></i> Informacje o zgłoszeniu</h5>
+                    <dl class="row">
+                        <dt class="col-sm-5">Numer Umowny:</dt>
+                        <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.NumerZlecenia) ? "Brak" : Model.NumerZlecenia)</dd>
+
+                        <dt class="col-sm-5">Data Utworzenia:</dt>
+                        <dd class="col-sm-7">@Model.DataUtworzenia.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                        <dt class="col-sm-5 text-danger">Przewidywany Koniec:</dt>
+                        <dd class="col-sm-7 fw-bold text-danger">
+                            @(Model.PrzewidywanaDataZakonczenia.HasValue ? Model.PrzewidywanaDataZakonczenia.Value.ToString("yyyy-MM-dd") : "Nie ustalono")
+                        </dd>
+
+                        <dt class="col-sm-5">Typ Gwarancji:</dt>
+                        <dd class="col-sm-7">@(Model.NaprawaGwarancyjna ? "Gwarancyjna" : "Odpłatna")</dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <h5 class="border-bottom pb-2 text-primary"><i class="bi bi-cpu"></i> Specyfikacja Urządzenia</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Typ urządzenia:</dt>
+                        <dd class="col-sm-8">@Model.TypUrzadzenia</dd>
+
+                        <dt class="col-sm-4">Producent / Model:</dt>
+                        <dd class="col-sm-8">@Model.Producent @Model.Model</dd>
+
+                        <dt class="col-sm-4">Numer seryjny:</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.NumerSeryjny) ? "Brak" : Model.NumerSeryjny)</dd>
+
+                        <dt class="col-sm-4">Zasilacz w zestawie:</dt>
+                        <dd class="col-sm-8">@(Model.CzyJestZasilacz ? "Tak" : "Nie")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h5 class="border-bottom pb-2 text-primary"><i class="bi bi-geo-alt"></i> Klient i Adres</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Konto logowania:</dt>
+                        <dd class="col-sm-8">@(Model.User?.Email ?? "Brak konta")</dd>
+
+                        <dt class="col-sm-4">Miejscowość:</dt>
+                        <dd class="col-sm-8">@Model.Miasto</dd>
+
+                        <dt class="col-sm-4">Adres:</dt>
+                        <dd class="col-sm-8">@Model.KodPocztowy, ul. @Model.Ulica @Model.Numer</dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <h5 class="border-bottom pb-2 text-primary"><i class="bi bi-file-earmark-text"></i> Opis i Notatki</h5>
+                    <p class="mb-1 fw-bold">Zgłoszona usterka:</p>
+                    <div class="p-2 bg-light border rounded mb-3" style="white-space: pre-wrap;">@Model.OpisUsterki</div>
+
+                    <p class="mb-1 fw-bold text-warning-emphasis">Wewnętrzne notatki techniczne:</p>
+                    <div class="p-2 bg-warning-subtle border border-warning rounded" style="white-space: pre-wrap;">
+                        @(string.IsNullOrEmpty(Model.ServiceNotes) ? "Brak wpisanych uwag serwisowych." : Model.ServiceNotes)
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3 border-top pt-3">
+                <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Powrót do listy</a>
+                <div>
+                    <a asp-action="SzczegolyIKomunikacja" asp-route-id="@Model.Id" class="btn btn-info text-white"><i class="bi bi-chat-dots"></i> Wiadomości</a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Edytuj / Zmień status</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
