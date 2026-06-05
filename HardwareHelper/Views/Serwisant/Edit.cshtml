@@ -79,7 +79,6 @@
                         {
                             foreach (var czesc in ViewBag.DostepneCzesci)
                             {
-                                // Sprawdzamy, czy ta część jest już przypisana do zlecenia w bazie
                                 bool isChecked = Model.CzescZamienna != null && Model.CzescZamienna.Any(c => c.Id == czesc.Id);
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" name="wybraneCzesciIds" value="@czesc.Id" @(isChecked ? "checked" : "")>
